@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>景区后台</title>
+    <style>
+        /* 设置地图容器的大小 */
+        #container {
+            height: 400px;
+            width: 70%;
+			margin: auto; 
+        }
+		.container {
+			width: 100vw;
+			min-height: 100vh;
+			padding: 20px;
+			background-color: rgba(255, 255, 255, 0.9);
+			box-sizing: border-box;
+		}
+		body {
+			font-family: Arial, sans-serif;
+			margin: 0;
+			padding: 0;
+			background-color: #ffffff;
+			color: #333;
+			min-height: 100vh;
+			background-attachment: fixed; /* 或者使用 'fixed'，具体取决于您希望的效果 */
+			background-image: url('./pic/background.jpg'); /* 网页背景图片 */
+			background-size: cover; /* 背景图片覆盖整个页面 */
+			background-position: center; /* 背景图片居中显示 */
+			position: relative;
+		}
+		body::before {
+            content: ''; /* 伪元素需要内容，但这里不显示任何东西 */
+            position: absolute; /* 相对于body定位 */
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.5); /* 白色背景，50%透明度 */
+            z-index: -1; /* 确保背景在内容之下 */
+        }
+	    .title-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 10px;
+		}
+
+		.title-logo {
+			margin-right: 20px;
+			width: 180px;
+			height: auto;
+		}
+
+		.title-text {
+			font-size: 24px;
+		}
+
+		h2 {
+			color: #000000;
+			font-weight: bold;
+			font-size: 64px;
+			text-align: center;
+			margin-top: 10px;
+			font-family: '楷体', 'KaiTi', 'STKaiti', serif;
+		}
+		table {
+            width: 70%; /* 表格宽度 */
+            margin-top: 20px; /* 表格与地图之间的间隙 */
+            border-collapse: collapse; /* 折叠边框 */
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        th, td {
+            border: 1px solid #ddd; /* 单元格边框 */
+            padding: 8px; /* 单元格内边距 */
+            text-align: left; /* 文本对齐方式 */
+        }
+
+        th {
+            background-color: #f2f2f2; /* 表头背景颜色 */
+        }
+    </style>
+</head>
+<body>
+	<div class="title-container">
+        <img src="./pic/logo.png" alt="Logo" class="title-logo">
+        <h2>AIoTMaster 景区管理后台</h2>
+    </div>
+    <div id="container"></div> <!-- 地图容器 -->
+	 <table id="infoTable">
+        <thead>
+            <tr>
+                <th>区域名</th>
+                <th>现场照片</th>
+                <th>时间</th>
+                <th>是否救生员已处理</th>
+				<th>操作</th> <!-- 添加一个新列用于放置按钮 -->
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 动态添加行 -->
+        </tbody>
+    </table>
+    <script type="text/javascript">
+        // 异步加载高德地图API
+        var mapScript = document.createElement("script");
+        mapScript.type = "text/javascript";
+        mapScript.src = "https://webapi.amap.com/maps?v=1.4.15&callback=initMap&key=addaa9e69e272968e8a6a4bd6b722456"; // 将YOUR_API_KEY替换为你的API Key
+        document.head.appendChild(mapScript);
+
+        // 初始化地图
+        function initMap() {
+            var map = new AMap.Map('container', {
+                zoom: 16, // 设置地图显示的缩放级别
+                center: [120.251319,35.961355], // 设置地图中心点坐标
+				layers: [
+                    new AMap.TileLayer.Satellite(), // 卫星图层
+                    new AMap.TileLayer.RoadNet() // 路网图层
+                ]
+            });
+			 var positions = [
+                [120.250278,35.960199],
+                [120.251319,35.961355],
+                [120.251965,35.961837]
+            ];
+            positions.forEach(function(position, index) {
+                // 创建标记
+                var marker = new AMap.Marker({
+                    position: position,
+                    map: map,
+                    // 可以为每个标记设置不同的图标
+                    icon: new AMap.Icon({
+                        size: new AMap.Size(40, 40),
+                        image: './pic/icon.png', // 为每个标记设置不同的图标
+                        imageSize: new AMap.Size(40, 40)
+                    }),
+                });
+
+
+                // 创建信息窗体
+			var text = new AMap.Text({
+					text: (index + 1) + '号区域可能出现溺水！',
+					position: position,
+					map: map,
+					offset: new AMap.Pixel(0, -50), // 根据需要调整偏移量以避免与标记重叠
+					style: {
+						'background-color': 'white',
+						'border': 'solid 1px #ccc',
+						'padding': '4px 8px',
+					}
+				});
+            });
+        }
+		</script>
+		
+	
+    <script>
+	 function addTableRow(areaName, imageUrl, timeStamp, isHandled) {
+            var table = document.getElementById("infoTable").getElementsByTagName('tbody')[0];
+            var newRow = table.insertRow(table.length);
+            var cell1 = newRow.insertCell(0);
+            var cell2 = newRow.insertCell(1);
+            var cell3 = newRow.insertCell(2);
+            var cell4 = newRow.insertCell(3);
+			var cell5 = newRow.insertCell(4);
+			
+            cell1.innerHTML = areaName;
+            cell2.innerHTML = '<img src="' + imageUrl + '" alt="Scene Photo" style="width:100px;">';
+            cell3.innerHTML = timeStamp;
+            cell4.innerHTML = isHandled ? "是" : "否";
+			var btn = document.createElement("button");
+            btn.innerHTML = "一键报警";
+            btn.className = "alert-button";
+            btn.onclick = function() {
+			alert("已向" + areaName + "发送报警信息！");
+                // 这里可以添加更多的报警处理逻辑
+				 markers[index].setMap(null); 
+            };
+            cell5.appendChild(btn);
+        }
+
+        // 示例：添加一行数据到表格
+        addTableRow("1号区域", "./pic/1.png", "2024-03-04 10:00", true);
+		addTableRow("2号区域", "./pic/img.png", "2024-03-04 12:38", true);
+		addTableRow("3号区域", "./pic/3.jpg", "2024-03-04 14:00", true);
+        // 你可以根据实际情况调用 addTableRow 函数来动态添加更多行
+		</script>
+</body>
+</html>
